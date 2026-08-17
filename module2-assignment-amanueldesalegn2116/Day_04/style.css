@@ -1,0 +1,127 @@
+:root {
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  /* Color Palette */
+  --header-bg: #5b5bd6;
+  --featured-bg: #0084c7;
+  --art1-bg: #0d9488;
+  --art2-bg: #d97706;
+  --art4-bg: #e11d48;
+  --art5-bg: #8b5cf6;
+  --art6-bg: #475569;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100vh;
+  background-color: #f1f5f9;
+  font-family: var(--font-sans);
+  overflow: hidden;
+}
+
+body {
+  display: flex;
+  padding: 12px;
+}
+
+/* Fullscreen Grid Container */
+.grid-container {
+  background-color: #ffffff;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: minmax(90px, 1fr) 1fr 1fr 1fr;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+}
+
+/* Shared Box Styling */
+.grid-box {
+  border-radius: 10px;
+  padding: 16px 20px;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.box-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+/* 1. HEADER */
+.header {
+  grid-column: 1 / -1;
+  grid-row: span 1;
+  background-color: var(--header-bg);
+}
+
+/* 2. FEATURED ARTICLE */
+.featured {
+  grid-column: span 2;
+  grid-row: span 2;
+  background-color: var(--featured-bg);
+}
+
+/* 3. Article Boxes */
+.article-1 {
+  grid-column: span 1;
+  grid-row: span 1;
+  background-color: var(--art1-bg);
+}
+
+.article-2 {
+  grid-column: span 1;
+  grid-row: span 1;
+  background-color: var(--art2-bg);
+}
+
+.article-4 {
+  grid-column: span 1;
+  grid-row: span 1;
+  background-color: var(--art4-bg);
+}
+
+.article-5 {
+  grid-column: span 1;
+  grid-row: span 1;
+  background-color: var(--art5-bg);
+}
+
+.article-6 {
+  grid-column: span 1;
+  grid-row: span 1;
+  background-color: var(--art6-bg);
+}
+
+/* Responsive view for small screens */
+@media (max-width: 700px) {
+  html, body {
+    overflow: auto;
+    height: auto;
+  }
+  
+  .grid-container {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    height: auto;
+  }
+  
+  .header, .featured, .article-1, .article-2, .article-4, .article-5, .article-6 {
+    grid-column: span 1;
+    grid-row: span 1;
+  }
+}

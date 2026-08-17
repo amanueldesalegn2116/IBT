@@ -1,0 +1,8 @@
+--- TeleBirr Tip & Split Calculator ---
+Bill Amount: 450.00 ETB
+Party Size: 3 person(s)
+Tip Rate: 10% (45.00 ETB)
+Payment Method: TeleBirr (Service Fee: 15.00 ETB)
+----------------------------------------
+Total Amount: 510.00 ETB
+Amount Per Person: 170.00 ETB

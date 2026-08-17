@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Addis Market Shopping List</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <div class="app-container">
+    <header class="header">
+      <h1>🛒 Addis Market Shopping List</h1>
+      <p class="subtitle">Single-page app with state-then-render loop</p>
+    </header>
+
+    <!-- Form for adding grocery items -->
+    <form id="form" class="add-form">
+      <input type="text" id="input" placeholder="Add grocery item (e.g., Milk, Bread)..." autocomplete="off">
+      <button type="submit" class="btn-add">Add</button>
+    </form>
+
+    <!-- Paragraph for displaying remaining item count -->
+    <p id="count" class="item-count">0 items remaining</p>
+
+    <!-- Empty ul where shopping items will appear -->
+    <ul id="list" class="items-list"></ul>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
