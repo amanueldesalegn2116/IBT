@@ -1,0 +1,204 @@
+Day 20 Quiz Answers
+Name Amanuel Desalegn
+
+
+1 PREDICT THE OUTPUT
+
+Code
+console.log("A");
+setTimeout(() => console.log("B"), 0);
+console.log("C");
+
+Output
+A
+C
+B
+
+Explanation
+A prints first then C prints right after because normal synchronous lines run right away on the call stack
+setTimeout is async so its callback gets pushed to the task queue
+even with 0ms delay the event loop waits until the main stack is totally clear before running B
+
+
+2 WRITE THE CODE
+
+Task
+Write getUser function taking id and callback with 1 second delay returning Almaz object
+
+Code
+function getUser(id, callback) {
+  setTimeout(() => {
+    callback({ id: id, name: "Almaz" });
+  }, 1000);
+}
+
+
+3 PREDICT THE OUTPUT
+
+Code
+const orderPromise = new Promise((resolve, reject) => {
+  reject(new Error("out of stock"));
+});
+
+orderPromise
+  .then(result => console.log("Got:", result))
+  .catch(err => console.log("Error:", err.message));
+
+Output
+Error: out of stock
+
+Explanation
+The promise fails right away with an error out of stock
+then only runs when a promise resolves successfully
+since it rejected javascript skips then completely and jumps straight to catch
+
+
+4 WRITE THE CODE
+
+Task
+Rewrite checkStock using a Promise called checkStockPromise
+
+Code
+function checkStockPromise(item) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if (item === "Doro Wat") {
+        resolve("In stock");
+      } else {
+        reject(new Error("Not found"));
+      }
+    }, 500);
+  });
+}
+
+
+5 PREDICT THE OUTPUT
+
+Code
+async function getTotal() {
+  return 240;
+}
+
+const result = getTotal();
+console.log(result);
+
+Output
+Promise { 240 }
+
+Explanation
+Async functions always return a promise object even if you return a plain number like 240
+Here getTotal runs without await so result stores the promise itself instead of the resolved number 240
+
+
+6 WRITE THE CODE
+
+Task
+Write async loadDishes to fetch dishes throw error if not ok and return json
+
+Code
+async function loadDishes() {
+  const res = await fetch("/api/dishes");
+  if (!res.ok) {
+    throw new Error("HTTP error " + res.status);
+  }
+  return await res.json();
+}
+
+
+7 PREDICT THE OUTPUT
+
+Code
+async function run() {
+  console.log("1");
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  console.log("2");
+}
+
+console.log("start");
+run();
+console.log("end");
+
+Output
+start
+1
+end
+(1 second delay)
+2
+
+Explanation
+await only pauses execution inside the run function
+it does not block the main script outside
+so start prints first then run starts and prints 1
+when run hits await it pauses inside while the main thread keeps moving and prints end
+after 1 second the promise finishes and 2 prints last
+
+
+8 DEBUG IT
+
+Task
+Fix loadPage to run both fetches at the same time instead of waiting one by one
+
+Code
+async function loadPage() {
+  const menuPromise = fetch("/api/menu");
+  const hoursPromise = fetch("/api/hours");
+
+  const [menuRes, hoursRes] = await Promise.all([menuPromise, hoursPromise]);
+  const [menu, hours] = await Promise.all([menuRes.json(), hoursRes.json()]);
+
+  return { menu, hours };
+}
+
+
+9 PREDICT THE OUTPUT
+
+Code
+async function getData() {
+  try {
+    const res = await fetch("/api/missing");
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    console.log(data);
+  } catch (err) {
+    console.log("Caught:", err.message);
+  } finally {
+    console.log("Done");
+  }
+}
+
+Output
+Caught: HTTP 404
+Done
+
+Explanation
+fetch gets a 404 response so res ok is false
+the code throws an error HTTP 404 which skips res json and jumps straight to catch
+catch logs Caught HTTP 404 and finally always runs at the end so it logs Done
+
+
+10 WRITE THE CODE
+
+Task
+Write loadAndRender to show loading state fetch dishes render list items or show failure message
+
+Code
+async function loadAndRender() {
+  const list = document.getElementById("list");
+  list.innerHTML = "Loading...";
+
+  try {
+    const res = await fetch("/api/dishes");
+    if (!res.ok) throw new Error("Failed to load");
+
+    const dishes = await res.json();
+    list.innerHTML = "";
+
+    dishes.forEach(dish => {
+      const li = document.createElement("li");
+      li.textContent = dish.name + " - " + dish.price + " ETB";
+      list.appendChild(li);
+    });
+  } catch (err) {
+    list.innerHTML = "Could not load dishes.";
+  }
+}

@@ -1,0 +1,339 @@
+Day 20 Assignment: Asynchronous JavaScript & APIs
+Name: Amanuel Desalegn
+
+
+Foundations: Sync vs Async & Callbacks
+--------------------------------------------------------------------
+
+1. Why async exists
+-------------------
+JavaScript runs one line at a time on one main thread. If a task takes time like getting data from a server or waiting on a timer the browser freezes. The user cannot click or scroll until the task finishes.
+
+Think of a waiter at a Habesha restaurant. If the waiter takes your order and stands at the kitchen window doing nothing until the food is cooked no other table gets served. That is synchronous. In async mode the waiter gives the ticket to the kitchen and goes to serve other tables right away. When the food is ready the waiter brings it to your table. Async JS works the same way so the website stays fast and smooth.
+
+
+2. Sync vs async sorted
+-----------------------
+Synchronous:
+- adding two numbers
+- a for loop over an array
+- reading a very long string
+- JSON.parse() on a small string
+
+Asynchronous:
+- fetch()
+- setTimeout()
+- an image finishing its download
+- a click event firing
+
+
+3. Ordering with setTimeout
+---------------------------
+Prints:
+A
+C
+B
+
+Why:
+First console.log("A") runs right away on the call stack and prints A.
+Next setTimeout runs with 0ms. JavaScript puts its callback in the task queue to run later.
+Then console.log("C") runs on the stack and prints C.
+Finally the stack is empty. The event loop picks the callback from the queue and prints B.
+
+
+4. Your first callback
+----------------------
+function orderCoffee(callback) {
+  setTimeout(() => {
+    callback("Coffee ready");
+  }, 1000);
+}
+
+orderCoffee((msg) => {
+  console.log(msg);
+});
+
+
+5. Callback hell
+----------------
+Callback hell happens when you put callbacks inside callbacks inside callbacks for steps that depend on each other.
+
+Example:
+getUser(1, (user) => {
+  getOrders(user.id, (orders) => {
+    getOrderDetails(orders[0].id, (details) => {
+      console.log("Details:", details);
+    });
+  });
+});
+
+This is bad because the code grows to the right. It gets messy to read and hard to handle errors at each step.
+
+
+
+Promises & async / await
+--------------------------------------------------------------------
+
+6. The three states
+-------------------
+The three states of a promise are pending fulfilled and rejected.
+
+No a promise cannot go backward or change after it settles. It moves once from pending to fulfilled or rejected.
+
+Because of this any .then() or .catch() attached to a promise will only run one time.
+
+
+7. Promise timing
+-----------------
+Prints:
+start
+end
+42
+
+Trace:
+1. console.log("start") runs first and prints start.
+2. getNumber() runs and creates a promise with a 1 second timer.
+3. .then() registers the function to run when done.
+4. console.log("end") runs and prints end.
+5. After 1 second the timer finishes and resolves 42. The function runs and prints 42.
+
+
+8. Callback to Promise
+----------------------
+function orderCoffeePromise() {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve("Coffee ready");
+    }, 1000);
+  });
+}
+
+orderCoffeePromise()
+  .then(result => console.log(result))
+  .catch(err => console.error("Error:", err));
+
+
+9. A chain that throws
+----------------------
+Execution skips the third .then() and goes straight to .catch().
+
+Prints:
+caught: step 2 failed
+
+Reason: Throwing an error in .then() rejects the promise. JS skips all next .then() steps and jumps right to .catch().
+
+
+10. async / await + try / catch
+-------------------------------
+async function getCoffee() {
+  try {
+    const result = await orderCoffeePromise();
+    console.log(result);
+  } catch (err) {
+    console.log("Could not get coffee");
+  }
+}
+
+getCoffee();
+
+
+11. Sequential vs parallel awaits
+---------------------------------
+Sequential awaits run tasks one after another. Task two waits until task one completes.
+Parallel awaits with Promise.all start all tasks at the exact same time.
+
+When to use:
+- Sequential: Use when task two needs data from task one. Example: getting a user first then using user.id to get orders.
+- Parallel: Use when tasks do not depend on each other. Example: loading user profile and site news together.
+
+
+
+Fetch APIs & Real Front-End Patterns
+--------------------------------------------------------------------
+
+12. Why res.ok matters
+----------------------
+fetch() does not fail on 404 or 500 status codes because the server still answered the request. It only fails if there is a network error like no internet.
+
+You must check res.ok in your code. If res.ok is false you throw an error so try/catch can catch it.
+
+
+13. Find the bugs
+-----------------
+Broken code:
+async function loadUsers() {
+  const res = fetch("https://jsonplaceholder.typicode.com/users");
+  const data = res.json();
+  console.log(data);
+}
+
+Bugs:
+1. Missing await on fetch
+2. Missing await on res.json()
+3. No check for res.ok status
+4. No try/catch block for errors
+
+Fixed code:
+async function loadUsers() {
+  try {
+    const res = await fetch("https://jsonplaceholder.typicode.com/users");
+    if (!res.ok) {
+      throw new Error(`Failed to load users: ${res.status}`);
+    }
+    const data = await res.json();
+    console.log(data);
+  } catch (err) {
+    console.error("Error:", err.message);
+  }
+}
+
+loadUsers();
+
+
+14. A clean fetch helper
+------------------------
+async function fetchDishes() {
+  const res = await fetch("/api/dishes");
+  if (!res.ok) {
+    throw new Error(`HTTP error ${res.status}`);
+  }
+  return await res.json();
+}
+
+async function loadDishes() {
+  try {
+    const dishes = await fetchDishes();
+    console.log("Dishes:", dishes);
+  } catch (err) {
+    console.error("Failed to load dishes:", err.message);
+  }
+}
+
+
+15. Load to render with all three UI states
+-------------------------------------------
+async function loadAndRenderDishes() {
+  const list = document.getElementById("dishes");
+  
+  // 1. Loading state
+  list.innerHTML = "<li>Loading…</li>";
+
+  try {
+    const res = await fetch("/api/dishes");
+    if (!res.ok) throw new Error("Fetch failed");
+    
+    const dishes = await res.json();
+    
+    // 2. Success state
+    list.innerHTML = dishes
+      .map(dish => `<li>${dish.name} - $${dish.price}</li>`)
+      .join("");
+  } catch (err) {
+    // 3. Error state
+    list.innerHTML = "<li>Sorry failed to load dishes. Please try again.</li>";
+  }
+}
+
+loadAndRenderDishes();
+
+
+16. Two independent requests in parallel
+-----------------------------------------
+async function loadData() {
+  try {
+    const [menuRes, hoursRes] = await Promise.all([
+      fetch("/api/menu"),
+      fetch("/api/hours")
+    ]);
+
+    if (!menuRes.ok || !hoursRes.ok) {
+      throw new Error("Failed to fetch menu or hours");
+    }
+
+    const menu = await menuRes.json();
+    const hours = await hoursRes.json();
+
+    console.log("Menu:", menu);
+    console.log("Hours:", hours);
+  } catch (err) {
+    console.error("Error:", err.message);
+  }
+}
+
+loadData();
+
+
+17. Unnecessary sequencing
+--------------------------
+Original code:
+const user = await getUser(1);
+const hours = await getHours();
+const orders = await getOrders(user.id);
+
+Is this optimal?
+No because getHours does not need user. It should not wait for getUser to finish.
+
+Only getOrders needs user.id.
+
+Faster code:
+// Fetch user and hours at the same time
+const [user, hours] = await Promise.all([
+  getUser(1),
+  getHours()
+]);
+
+// Fetch orders after user is ready
+const orders = await getOrders(user.id);
+
+
+18. Habesha Eatery Menu mini app
+--------------------------------
+// 1. Fetch dishes from API
+async function fetchDishes() {
+  const res = await fetch("https://jsonplaceholder.typicode.com/posts?_limit=5");
+  if (!res.ok) {
+    throw new Error(`HTTP Error: ${res.status}`);
+  }
+  const data = await res.json();
+  
+  const menuItems = [
+    { name: "Doro Wot", price: 350 },
+    { name: "Special Kitfo", price: 400 },
+    { name: "Beyaynetu", price: 200 },
+    { name: "Beef Tibs", price: 320 },
+    { name: "Shiro Tegabeno", price: 180 }
+  ];
+
+  return data.map((item, idx) => ({
+    id: item.id,
+    name: menuItems[idx % menuItems.length].name,
+    price: menuItems[idx % menuItems.length].price
+  }));
+}
+
+// 2. Load function for UI states
+async function load() {
+  const dishesList = document.getElementById("dishes");
+  if (!dishesList) return;
+
+  dishesList.innerHTML = `<li>Loading menu...</li>`;
+
+  try {
+    const dishes = await fetchDishes();
+    dishesList.innerHTML = dishes
+      .map(d => `<li><strong>${d.name}</strong> — ${d.price} ETB</li>`)
+      .join("");
+  } catch (err) {
+    dishesList.innerHTML = `<li class="error">Could not load menu. Click refresh to try again.</li>`;
+  }
+}
+
+// 3. Set event listener and load on start
+document.addEventListener("DOMContentLoaded", () => {
+  load();
+
+  const refreshBtn = document.getElementById("refresh-btn");
+  if (refreshBtn) {
+    refreshBtn.addEventListener("click", load);
+  }
+});
