@@ -1,5 +1,0 @@
-Reflection:
-- Working directory: files currently being edited.
-- Staging area: files selected via 'git add' ready to commit.
-- Local repo: committed snapshots in .git.
-- 'ls -a' lists hidden files.

@@ -1,4 +1,0 @@
-Terminal Commands Learned:
-1. pwd - print working directory
-2. ls -la - list all files including hidden
-3. git status - view staging area
